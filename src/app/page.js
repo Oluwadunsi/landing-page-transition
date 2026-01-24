@@ -1,9 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { signIn, useSession } from 'next-auth/react';
+import Welcome from './welcome/page';
 
 export default function Home() {
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    setTimeout(() => setIsLoaded(true), 100);
+  }, []);
+
+  const handleOAuthSignIn = (provider) => {
+    signIn(provider, { callbackUrl: '/' });
+  };
+
+  if(session) {
+    return <Welcome session={session}></Welcome>
+  }
 
   return (
     <div className="relative min-h-screen bg-white overflow-hidden">
@@ -11,15 +27,19 @@ export default function Home() {
       {/* PURPLE BLOB */}
       <div
         className={`
-          absolute inset-y-0 w-full h-1/3 md:w-1/2 md:h-full bg-[#6A0DAD] transition-all duration-300 ease-in-out
+          absolute inset-y-0 w-full h-1/3 md:w-1/2 md:h-full bg-[#6A0DAD] transition-all duration-1000 ease-out
           ${isRegistering 
-            ? 'top-0  md:translate-x-full md:rounded-l-[15rem]' 
-            : 'bottom-0 translate-x-0 md:rounded-r-[15rem]'
+            ? 'top-0 md:translate-x-full' 
+            : 'bottom-0 translate-x-0'
           }
+          ${!isLoaded ? 'scale-100' : 'scale-100'}
         `}
         style={{
           left: isRegistering ? 'auto' : '0',
           right: isRegistering ? 'auto' : '0',
+          borderRadius: isLoaded 
+            ? (isRegistering ? '20rem 0 0 20rem' : '0 20rem 20rem 0')
+            : (isRegistering ? '15rem 0 0 15rem' : '0 15rem 15rem 0')
         }}
       />
 
@@ -28,7 +48,7 @@ export default function Home() {
         
         {/* TEXT PANEL */}
         <div
-          className={`p-8 md:p-10 flex flex-col justify-center transition-all duration-300
+          className={`p-8 md:p-10 flex flex-col justify-center transition-all duration-700
             ${isRegistering ? 'md:order-2' : 'md:order-1'}
           `}
         >
@@ -67,7 +87,7 @@ export default function Home() {
               {isRegistering ? "Create Account" : "Sign In"}
             </h2>
 
-            {/* OTHER LOGIN OPTIONS */}
+            {/* LOGIN OPTIONS */}
             <div className="mt-6">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
@@ -78,10 +98,9 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="mt-6 grid grid-cols-3 gap-3">
-                  <SocialButton icon="G" label="Google" />
-                  <SocialButton icon="f" label="Facebook" />
-                  <SocialButton icon="X" label="X" />
+                <div className="mt-6 grid grid-cols-2 gap-2">
+                  <SocialButton icon="G" label="Google" onClick={()=> handleOAuthSignIn('google')}/>
+                  <SocialButton icon="f" label="Facebook" onClick={()=> handleOAuthSignIn('facebook')}/>
                 </div>
             </div>
             {isRegistering && <Input placeholder="Name" />}
@@ -114,11 +133,12 @@ function Input({ placeholder }) {
 }
 
 // SOCIAL BUTTON
-function SocialButton({ icon, label }) {
+function SocialButton({ icon, label, onClick }) {
   return (
     <button
       type="button"
       aria-label={label}
+      onClick={onClick}
       className="flex items-center justify-center w-full p-3 border border-gray-300 rounded-full hover:border-[#6A0DAD] hover:bg-[#6A0DAD]/5 transition"
     >
       <span className="text-lg font-bold text-gray-700">{icon}</span>
