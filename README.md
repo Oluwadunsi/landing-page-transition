@@ -36,4 +36,7 @@ And I can’t wait to build more things that *move people*.
 - **Vercel** (deployment)
 
 ---
+## Update
+> I wanted to gain experience in setting up login authentication using OAuth which led me to further evolving the page.
+> [Video] (https://jumpshare.com/share/9f06dqxOwQbr0cNuhbWQ)
 
